@@ -2,7 +2,6 @@ package com.i_sys.messanger.data.messages;
 
 import com.i_sys.messanger.data.BaseEntity;
 import com.i_sys.messanger.data.users.User;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Data;
 
