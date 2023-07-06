@@ -1,0 +1,16 @@
+server:
+    port: 8079
+
+spring:
+    datasource:
+      url: jdbc:postgresql://localhost:5432/messenger-db
+      driver-class-name: org.postgresql.Driver
+      username: postgres
+      password: 123456
+
+    jpa:
+      show-sql: false
+      hibernate:
+        ddl-auto: validate
+
+
