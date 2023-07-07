@@ -1,35 +1,28 @@
 package com.i_sys.messanger.data.users;
 
 import com.i_sys.messanger.data.BaseEntity;
-import com.i_sys.messanger.data.messages.Message;
-import com.i_sys.messanger.data.messages.MessageView;
+import com.i_sys.messanger.data.messages.Notification;
+import com.i_sys.messanger.data.messages.NotificationView;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "users")
+@Table(schema = "notification", name = "tr_user")
 public class User extends BaseEntity {
 
-    @Column(name = "login", nullable = false)
-    private String login;
+    @Column(name = "external_id", nullable = false)
+    private UUID externalId;
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true
-        , fetch = FetchType.EAGER)
-    private List<Message> messages = new ArrayList<>();
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,
-        fetch = FetchType.EAGER)
-    private List<MessageView> messageViews = new ArrayList<>();
-
-    public User(String login) {
-        this.login = login;
-    }
-
-    public User() {
-
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NotificationView> notificationViews = new ArrayList<>();
 }

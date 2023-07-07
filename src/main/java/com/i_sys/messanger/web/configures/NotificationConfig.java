@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaRepositories
-public class OpenAPI30Configuration {
+public class NotificationConfig {
 
 }
