@@ -2,34 +2,33 @@ package com.i_sys.messanger.core.users.services;
 
 import com.i_sys.messanger.core.users.repositories.UserRepository;
 import com.i_sys.messanger.data.users.User;
+import com.i_sys.messanger.data.users.UserConvertor;
 import com.i_sys.messanger.web.controllers.users.dto.UserDto;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserServiceDao {
-    private static final Logger log = LoggerFactory
-            .getLogger(UserServiceDao.class.getName());
-    private final UserRepository userRepository;
 
+    private final UserRepository userRepository;
+    private final UserConvertor userConvertor;
+
+    @Transactional
     public List<UserDto> getAllUsers() {
         log.info("Call method of UserServiceDao: getAllUsers()");
 
-        List<UserDto> result = new ArrayList<>();
-
-        for (User user : userRepository.findAll()) {
-            UserDto userDto = new UserDto();
-            userDto.setId(user.getId());
-            userDto.setExternalId(user.getExternalId());
-
-            result.add(userDto);
-        }
+        List<UserDto> result = userRepository.findAll()
+                .stream()
+                .map(userConvertor::convertToDto)
+                .collect(Collectors.toList());
 
         log.info("Method of UserServiceDao: " +
                 "getAllUsers() successfully completed");
@@ -37,6 +36,7 @@ public class UserServiceDao {
         return result;
     }
 
+    @Transactional
     public UserDto getUserById(UUID id) {
         log.info("Call method of UserServiceDao: getUserById(" + id + ")");
 
@@ -46,10 +46,7 @@ public class UserServiceDao {
            return null;
         }
 
-        UserDto result = new UserDto();
-
-        result.setId(user.getId());
-        result.setId(user.getExternalId());
+        UserDto result = userConvertor.convertToDto(user);
 
         log.info("Method of UserServiceDao: " +
                 "getUserById(" + id + ") successfully completed");
@@ -57,18 +54,13 @@ public class UserServiceDao {
         return result;
     }
 
+    @Transactional
     public UserDto createUser(UserDto user) {
         log.info("Call method of UserServiceDao: createUser(" + user + ")");
 
-        User userForCreate = new User();
-        userForCreate.setExternalId(user.getExternalId());
-
-        User entity = userRepository.save(userForCreate);
-
-        UserDto result = new UserDto();
-
-        result.setId(entity.getId());
-        result.setExternalId(entity.getExternalId());
+        UserDto result = userConvertor
+                .convertToDto(userRepository
+                        .save(userConvertor.convertToModel(user)));
 
         log.info("Method of UserService: " +
                 "createUser(" + user + ") successfully completed");
@@ -76,20 +68,18 @@ public class UserServiceDao {
         return result;
     }
 
+    @Transactional
     public UserDto updateUser(UUID id, UserDto user) {
         log.info("Call method of UserServiceDao: " +
                 "updateUser(" + id + "," + user + ")");
 
-        User userForUpdate = userRepository.findById(id).orElse(null);
+        User userForUpdate = userConvertor.convertToModel(user);
 
-        userForUpdate.setExternalId(user.getExternalId());
+        userForUpdate.setId(id);
 
-        User entity = userRepository.save(userForUpdate);
-
-        UserDto result = new UserDto();
-
-        result.setId(entity.getId());
-        result.setExternalId(entity.getExternalId());
+        UserDto result = userConvertor
+                .convertToDto(userRepository
+                        .save(userForUpdate));
 
         log.info("Method of UserServiceDao: " +
                 "updateUser(" + id + "," + user + ") successfully completed");
@@ -97,10 +87,13 @@ public class UserServiceDao {
         return result;
     }
 
+    @Transactional
     public void deleteUser(UUID id) {
         log.info("Call method of UserServiceDao: deleteUser(" + id + ")");
 
-        userRepository.delete(userRepository.findById(id).orElse(null));
+        userRepository.delete(Objects
+                .requireNonNull(userRepository
+                        .findById(id).orElse(null)));
 
         log.info("Method of UserServiceDao: " +
                 "deleteUser(" + id + ") successfully completed");

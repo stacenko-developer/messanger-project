@@ -4,26 +4,30 @@ import com.i_sys.messanger.core.notifications.repositories.NotificationRepositor
 import com.i_sys.messanger.core.notifications.repositories.NotificationViewRepository;
 import com.i_sys.messanger.core.users.repositories.UserRepository;
 import com.i_sys.messanger.data.notifications.Notification;
+import com.i_sys.messanger.data.notifications.NotificationConvertor;
 import com.i_sys.messanger.data.notifications.NotificationView;
 import com.i_sys.messanger.web.controllers.notifications.dto.NotificationDto;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class NotificationServiceDao {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(NotificationServiceDao.class.getName());
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final NotificationViewRepository notificationViewRepository;
+    private final NotificationConvertor notificationConvertor;
 
+    @Transactional
     public List<NotificationDto> getAllNotifications(UUID userId) {
         log.info("Call method of NotificationServiceDao: getAllNotifications("
                 + userId + ")");
@@ -31,16 +35,7 @@ public class NotificationServiceDao {
         List<NotificationDto> result = new ArrayList<>();
 
         for (Notification notification : notificationRepository.findAll()) {
-            NotificationDto notificationDto = new NotificationDto();
-            NotificationView notificationView = notificationViewRepository
-                    .findByUserIdAndNotificationId(userId, notification.getId())
-                    .orElse(null);
-
-            notificationDto.setId(notification.getId());
-            notificationDto.setRead(notificationView != null
-                    && notificationView.isRead());
-            notificationDto.setSender(notification.getSender());
-            notificationDto.setText(notification.getText());
+            result.add(notificationConvertor.convertToDto(notification, userId));
         }
 
         log.info("Method of NotificationServiceDao: " +
@@ -49,6 +44,7 @@ public class NotificationServiceDao {
         return result;
     }
 
+    @Transactional
     public NotificationDto getNotificationById(UUID notificationId, UUID userId) {
         log.info("Call method of NotificationServiceDao: " +
                 "getNotificationById(" + notificationId + "," + userId + ")");
@@ -60,17 +56,7 @@ public class NotificationServiceDao {
             return null;
         }
 
-        NotificationDto result = new NotificationDto();
-
-        NotificationView notificationView = notificationViewRepository
-                .findByUserIdAndNotificationId(userId, notification.getId())
-                .orElse(null);
-
-        result.setId(notification.getId());
-        result.setRead(notificationView != null
-                && notificationView.isRead());
-        result.setSender(notification.getSender());
-        result.setText(notification.getText());
+        NotificationDto result = notificationConvertor.convertToDto(notification, userId);
 
         log.info("Method of NotificationServiceDao: " +
                 "getNotificationById(" + notificationId + "," + userId + ") " +
@@ -79,22 +65,14 @@ public class NotificationServiceDao {
         return result;
     }
 
+    @Transactional
     public NotificationDto createNotification(NotificationDto notification) {
         log.info("Call method of NotificationServiceDao: " +
                 "createNotification(" + notification + ")");
 
-        Notification notificationForCreate = new Notification();
-
-        notificationForCreate.setSender(notification.getSender());
-        notificationForCreate.setText(notification.getText());
-
-        Notification entity = notificationRepository.save(notificationForCreate);
-
-        NotificationDto result = new NotificationDto();
-
-        result.setId(entity.getId());
-        result.setSender(entity.getSender());
-        result.setText(entity.getText());
+        NotificationDto result = notificationConvertor
+                .convertToDto(notificationRepository
+                .save(notificationConvertor.convertToModel(notification)));
 
         log.info("Method of NotificationServiceDao: " +
                 "createNotification(" + notification + ") successfully completed");
@@ -102,23 +80,19 @@ public class NotificationServiceDao {
         return result;
     }
 
+    @Transactional
     public NotificationDto updateNotification(UUID id, NotificationDto notification) {
         log.info("Call method of NotificationServiceDao: " +
                 "updateNotification(" + id + "," + notification + ")");
 
-        Notification notificationForUpdate = notificationRepository
-                .findById(id).orElse(null);
+        Notification notificationForUpdate = notificationConvertor
+                .convertToModel(notification);
 
-        notificationForUpdate.setSender(notification.getSender());
-        notificationForUpdate.setText(notification.getText());
+        notificationForUpdate.setId(id);
 
-        Notification entity = notificationRepository.save(notificationForUpdate);
-
-        NotificationDto result = new NotificationDto();
-
-        result.setId(entity.getId());
-        result.setSender(entity.getSender());
-        result.setText(entity.getText());
+        NotificationDto result = notificationConvertor
+                .convertToDto(notificationRepository
+                        .save(notificationForUpdate));
 
         log.info("Method of NotificationServiceDao: " +
                 "updateNotification(" + id + "," + notification + ") " +
@@ -127,57 +101,57 @@ public class NotificationServiceDao {
         return result;
     }
 
+    @Transactional
     public void deleteNotification(UUID id) {
         log.info("Call method of NotificationServiceDao: " +
                 "deleteNotification(" + id + ")");
 
-        notificationRepository.delete(notificationRepository
-                .findById(id).orElse(null));
+        notificationRepository.delete(Objects
+                .requireNonNull(notificationRepository
+                        .findById(id).orElse(null)));
 
         log.info("Method of NotificationServiceDao: " +
                 "deleteNotification(" + id + ") successfully completed");
     }
 
-    private void changeNotificationReadFlag(UUID notificationId, UUID userId,
-                                            boolean readFlag) {
-        NotificationView notificationView = notificationViewRepository
+    @Transactional
+    public boolean checkNotificationViewExistenceByUserIdAndNotificationId(
+            UUID userId, UUID notificationId) {
+        return notificationViewRepository
                 .findByUserIdAndNotificationId(userId, notificationId)
-                .orElse(null);
-
-        if (notificationView == null) {
-            notificationView = new NotificationView();
-        }
-
-        NotificationView newNotificationView = new NotificationView();
-
-        newNotificationView.setNotification(
-                notificationRepository.findById(notificationId)
-                        .orElse(null));
-
-        newNotificationView.setUser(
-                userRepository.findById(userId)
-                        .orElse(null));
-
-        newNotificationView.setRead(readFlag);
-
-        notificationViewRepository.save(notificationView);
+                .orElse(null) != null;
     }
 
+    @Transactional
     public void doRead(UUID notificationId, UUID userId) {
         log.info("Call method of NotificationServiceDao: doRead(" + notificationId + ","
                 + userId + ")");
 
-        changeNotificationReadFlag(notificationId, userId, true);
+        NotificationView notificationView = notificationViewRepository
+                .findByUserIdAndNotificationId(userId, notificationId).orElse(null);
+
+        if (notificationView == null) {
+            NotificationView view = new NotificationView();
+            view.setRead(true);
+            view.setNotification(notificationRepository.findById(notificationId).orElse(null));
+            view.setUser(userRepository.findById(userId).orElse(null));
+
+            notificationViewRepository.save(view);
+        }
 
         log.info("Method of NotificationServiceDao: doRead(" + notificationId + ","
                 + userId + ") successfully completed");
     }
 
+    @Transactional
     public void doUnRead(UUID notificationId, UUID userId) {
         log.info("Call method of NotificationServiceDao: doUnRead(" + notificationId + ","
                 + userId + ")");
 
-        changeNotificationReadFlag(notificationId, userId, false);
+        NotificationView notificationView = notificationViewRepository
+                .findByUserIdAndNotificationId(userId, notificationId).orElse(null);
+
+        notificationViewRepository.delete(notificationView);
 
         log.info("Method of NotificationServiceDao: doUnRead(" + notificationId + ","
                 + userId + ") successfully completed");
