@@ -1,0 +1,1 @@
+alter table notification.tr_notification_view drop column is_read;

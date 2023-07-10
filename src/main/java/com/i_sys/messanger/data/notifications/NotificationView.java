@@ -22,8 +22,4 @@ public class NotificationView extends BaseEntity {
     @JoinColumn(name = "notification_id", nullable = false)
     @Comment("Идентификатор уведомления")
     private Notification notification;
-
-    @Column(name = "is_read", nullable = false)
-    @Comment("Прочитано ли уведомление")
-    private boolean isRead;
 }

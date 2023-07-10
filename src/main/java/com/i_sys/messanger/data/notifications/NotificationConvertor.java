@@ -27,8 +27,7 @@ public class NotificationConvertor {
                 .findFirst()
                 .orElse(null);
 
-        notificationDto.setRead(notificationView != null
-            && notificationView.isRead());
+        notificationDto.setRead(notificationView != null);
 
         return notificationDto;
     }

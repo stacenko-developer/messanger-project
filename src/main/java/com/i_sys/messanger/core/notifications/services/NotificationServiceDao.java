@@ -45,6 +45,52 @@ public class NotificationServiceDao {
     }
 
     @Transactional
+    public List<NotificationDto> getAllReadNotifications(UUID userId) {
+        log.info("Call method of NotificationServiceDao: getAllReadNotifications("
+                + userId + ")");
+
+        List<NotificationDto> result = new ArrayList<>();
+
+        for (Notification notification : notificationRepository.findAll()) {
+
+            NotificationDto notificationDto = notificationConvertor
+                    .convertToDto(notification, userId);
+
+            if (notificationDto.isRead()) {
+                result.add(notificationConvertor.convertToDto(notification, userId));
+            }
+        }
+
+        log.info("Method of NotificationServiceDao: " +
+                "getAllReadNotifications(" + userId + ") successfully completed");
+
+        return result;
+    }
+
+    @Transactional
+    public List<NotificationDto> getAllUnReadNotifications(UUID userId) {
+        log.info("Call method of NotificationServiceDao: getAllUnReadNotifications("
+                + userId + ")");
+
+        List<NotificationDto> result = new ArrayList<>();
+
+        for (Notification notification : notificationRepository.findAll()) {
+
+            NotificationDto notificationDto = notificationConvertor
+                    .convertToDto(notification, userId);
+
+            if (!notificationDto.isRead()) {
+                result.add(notificationConvertor.convertToDto(notification, userId));
+            }
+        }
+
+        log.info("Method of NotificationServiceDao: " +
+                "getAllUnReadNotifications(" + userId + ") successfully completed");
+
+        return result;
+    }
+
+    @Transactional
     public NotificationDto getNotificationById(UUID notificationId, UUID userId) {
         log.info("Call method of NotificationServiceDao: " +
                 "getNotificationById(" + notificationId + "," + userId + ")");
@@ -132,7 +178,6 @@ public class NotificationServiceDao {
 
         if (notificationView == null) {
             NotificationView view = new NotificationView();
-            view.setRead(true);
             view.setNotification(notificationRepository.findById(notificationId).orElse(null));
             view.setUser(userRepository.findById(userId).orElse(null));
 
