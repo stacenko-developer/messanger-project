@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,7 @@ public class NotificationServiceDao {
                 .findAll(PageRequest.of(pageNumber, size))
                 .map(notification -> notificationConvertor.convertToDto(notification, userId));
 
+
         log.info("Method of NotificationServiceDao: " +
                 "getAllNotifications(" + userId + ") successfully completed");
 
@@ -45,20 +47,15 @@ public class NotificationServiceDao {
     }
 
     @Transactional
-    public List<NotificationDto> getAllReadNotifications(UUID userId, int pageNumber, int size) {
+    public Page<NotificationDto> getAllReadNotifications(UUID userId, int pageNumber, int size) {
         log.info("Call method of NotificationServiceDao: getAllReadNotifications("
                 + userId + ")");
 
-
-        List<NotificationDto> result = new ArrayList<>();
-
-        for (NotificationView nw : notificationViewRepository.findByUserId(userId)) {
-            result.add(notificationConvertor.convertToDto(notificationRepository.findById(nw.getNotification().getId()).orElse(null), userId));
-        }
+        Page<NotificationDto> result = new PageImpl<>(notificationRepository.findAllReadNotifications(userId))
+                .map(notification -> notificationConvertor.convertToDto(notification, userId));
 
         log.info("Method of NotificationServiceDao: " +
                 "getAllReadNotifications(" + userId + ") successfully completed");
-
 
         return result;
     }
