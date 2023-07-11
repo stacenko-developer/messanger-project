@@ -14,21 +14,21 @@ public class GlobalExceptionHandler {
     @ResponseStatus(value = HttpStatus.OK)
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity handleException(NotFoundException ex) {
-        log.info(ex.getMessage());
+        log.info(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.OK).body(ex.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity handleException(ValidationException ex) {
-        log.error(ex.getMessage());
+        log.info(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ResponseEntity handleException(Exception ex) {
-        log.error(ex.getMessage());
+        log.info(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error!");
     }
 }
