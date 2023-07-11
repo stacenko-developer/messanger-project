@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -22,13 +23,11 @@ public class UserServiceDao {
     private final ModelMapper userConvertor;
 
     @Transactional
-    public List<UserDto> getAllUsers(int offset, int limit) {
+    public Page<UserDto> getAllUsers(int pageNumber, int size) {
         log.info("Call method of UserServiceDao: getAllUsers()");
 
-        List<UserDto> result = userRepository.findAll(PageRequest.of(offset, limit))
-                .stream()
-                .map(user -> userConvertor.map(user, UserDto.class))
-                .collect(Collectors.toList());
+        Page<UserDto> result = userRepository.findAll(PageRequest.of(pageNumber, size))
+                .map(user -> userConvertor.map(user, UserDto.class));
 
         log.info("Method of UserServiceDao: " +
                 "getAllUsers() successfully completed");
