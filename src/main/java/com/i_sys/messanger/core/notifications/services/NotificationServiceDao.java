@@ -47,8 +47,11 @@ public class NotificationServiceDao {
         log.info("Call method of NotificationServiceDao: getAllReadNotifications("
                 + userId + ")");
 
-        Page<NotificationDto> result = new PageImpl<>(notificationRepository.findNotificationsByNotificationViews_UserId(userId))
-                .map(notification -> notificationConvertor.convertToDto(notification, userId));
+        Page<NotificationDto> result = new PageImpl<>(notificationRepository
+                .findNotificationsByNotificationViews_UserId(userId,
+                        PageRequest.of(pageNumber, size)))
+                .map(notification
+                        -> notificationConvertor.convertToDto(notification, userId));
 
         log.info("Method of NotificationServiceDao: " +
                 "getAllReadNotifications(" + userId + ") successfully completed");
@@ -61,8 +64,11 @@ public class NotificationServiceDao {
         log.info("Call method of NotificationServiceDao: getAllUnReadNotifications("
                 + userId + ")");
 
-        Page<NotificationDto> result = new PageImpl<>(notificationRepository.findAllUnReadNotifications(userId))
-                .map(notification -> notificationConvertor.convertToDto(notification, userId));
+        Page<NotificationDto> result = new PageImpl<>(notificationRepository
+                .findAllUnReadNotifications(userId,
+                        PageRequest.of(pageNumber, size)))
+                .map(notification
+                        -> notificationConvertor.convertToDto(notification, userId));
 
         log.info("Method of NotificationServiceDao: " +
                 "getAllUnReadNotifications(" + userId + ") successfully completed");
