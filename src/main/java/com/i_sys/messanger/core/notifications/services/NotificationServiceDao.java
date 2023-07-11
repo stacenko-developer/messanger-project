@@ -61,9 +61,8 @@ public class NotificationServiceDao {
         log.info("Call method of NotificationServiceDao: getAllUnReadNotifications("
                 + userId + ")");
 
-        Page<NotificationDto> result = notificationRepository.findAll(PageRequest.of(pageNumber, size))
+        Page<NotificationDto> result = new PageImpl<>(notificationRepository.findAllUnReadNotifications(userId))
                 .map(notification -> notificationConvertor.convertToDto(notification, userId));
-
 
         log.info("Method of NotificationServiceDao: " +
                 "getAllUnReadNotifications(" + userId + ") successfully completed");
