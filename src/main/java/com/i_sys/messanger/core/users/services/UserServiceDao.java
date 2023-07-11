@@ -2,14 +2,14 @@ package com.i_sys.messanger.core.users.services;
 
 import com.i_sys.messanger.core.users.repositories.UserRepository;
 import com.i_sys.messanger.data.users.User;
-import com.i_sys.messanger.data.users.UserConvertor;
 import com.i_sys.messanger.web.controllers.users.dto.UserDto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,15 +19,15 @@ import java.util.stream.Collectors;
 public class UserServiceDao {
 
     private final UserRepository userRepository;
-    private final UserConvertor userConvertor;
+    private final ModelMapper userConvertor;
 
     @Transactional
-    public List<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers(int offset, int limit) {
         log.info("Call method of UserServiceDao: getAllUsers()");
 
-        List<UserDto> result = userRepository.findAll()
+        List<UserDto> result = userRepository.findAll(PageRequest.of(offset, limit))
                 .stream()
-                .map(userConvertor::convertToDto)
+                .map(user -> userConvertor.map(user, UserDto.class))
                 .collect(Collectors.toList());
 
         log.info("Method of UserServiceDao: " +
@@ -46,7 +46,7 @@ public class UserServiceDao {
            return null;
         }
 
-        UserDto result = userConvertor.convertToDto(user);
+        UserDto result = userConvertor.map(user, UserDto.class);
 
         log.info("Method of UserServiceDao: " +
                 "getUserById(" + id + ") successfully completed");
@@ -59,8 +59,8 @@ public class UserServiceDao {
         log.info("Call method of UserServiceDao: createUser(" + user + ")");
 
         UserDto result = userConvertor
-                .convertToDto(userRepository
-                        .save(userConvertor.convertToModel(user)));
+                .map(userRepository.save(userConvertor.map(user, User.class)),
+                        UserDto.class);
 
         log.info("Method of UserService: " +
                 "createUser(" + user + ") successfully completed");
@@ -73,13 +73,12 @@ public class UserServiceDao {
         log.info("Call method of UserServiceDao: " +
                 "updateUser(" + id + "," + user + ")");
 
-        User userForUpdate = userConvertor.convertToModel(user);
+        User userForUpdate = userConvertor.map(user, User.class);
 
         userForUpdate.setId(id);
 
         UserDto result = userConvertor
-                .convertToDto(userRepository
-                        .save(userForUpdate));
+                .map(userRepository.save(userForUpdate), UserDto.class);
 
         log.info("Method of UserServiceDao: " +
                 "updateUser(" + id + "," + user + ") successfully completed");
@@ -91,9 +90,7 @@ public class UserServiceDao {
     public void deleteUser(UUID id) {
         log.info("Call method of UserServiceDao: deleteUser(" + id + ")");
 
-        userRepository.delete(Objects
-                .requireNonNull(userRepository
-                        .findById(id).orElse(null)));
+        userRepository.deleteById(id);
 
         log.info("Method of UserServiceDao: " +
                 "deleteUser(" + id + ") successfully completed");

@@ -2,7 +2,6 @@ package com.i_sys.messanger.web.controllers.notifications.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.UUID;
 
 @Getter

@@ -10,12 +10,11 @@ import com.i_sys.messanger.web.controllers.notifications.dto.NotificationDto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,15 +27,15 @@ public class NotificationServiceDao {
     private final NotificationConvertor notificationConvertor;
 
     @Transactional
-    public List<NotificationDto> getAllNotifications(UUID userId) {
+    public List<NotificationDto> getAllNotifications(UUID userId, int offset, int limit) {
         log.info("Call method of NotificationServiceDao: getAllNotifications("
                 + userId + ")");
 
-        List<NotificationDto> result = new ArrayList<>();
-
-        for (Notification notification : notificationRepository.findAll()) {
-            result.add(notificationConvertor.convertToDto(notification, userId));
-        }
+        List<NotificationDto> result = notificationRepository
+                .findAll(PageRequest.of(offset, limit))
+                .stream()
+                .map(notification -> notificationConvertor.convertToDto(notification, userId))
+                .collect(Collectors.toList());
 
         log.info("Method of NotificationServiceDao: " +
                 "getAllNotifications(" + userId + ") successfully completed");
@@ -45,21 +44,15 @@ public class NotificationServiceDao {
     }
 
     @Transactional
-    public List<NotificationDto> getAllReadNotifications(UUID userId) {
+    public List<NotificationDto> getAllReadNotifications(UUID userId, int offset, int limit) {
         log.info("Call method of NotificationServiceDao: getAllReadNotifications("
                 + userId + ")");
 
-        List<NotificationDto> result = new ArrayList<>();
-
-        for (Notification notification : notificationRepository.findAll()) {
-
-            NotificationDto notificationDto = notificationConvertor
-                    .convertToDto(notification, userId);
-
-            if (notificationDto.isRead()) {
-                result.add(notificationConvertor.convertToDto(notification, userId));
-            }
-        }
+        List<NotificationDto> result = notificationRepository.findAll(PageRequest.of(offset, limit))
+                .stream()
+                .filter(note -> notificationConvertor.convertToDto(note, userId).isRead())
+                .map(notification -> notificationConvertor.convertToDto(notification, userId))
+                .collect(Collectors.toList());
 
         log.info("Method of NotificationServiceDao: " +
                 "getAllReadNotifications(" + userId + ") successfully completed");
@@ -68,21 +61,16 @@ public class NotificationServiceDao {
     }
 
     @Transactional
-    public List<NotificationDto> getAllUnReadNotifications(UUID userId) {
+    public List<NotificationDto> getAllUnReadNotifications(UUID userId, int offset, int limit) {
         log.info("Call method of NotificationServiceDao: getAllUnReadNotifications("
                 + userId + ")");
 
-        List<NotificationDto> result = new ArrayList<>();
-
-        for (Notification notification : notificationRepository.findAll()) {
-
-            NotificationDto notificationDto = notificationConvertor
-                    .convertToDto(notification, userId);
-
-            if (!notificationDto.isRead()) {
-                result.add(notificationConvertor.convertToDto(notification, userId));
-            }
-        }
+        List<NotificationDto> result = notificationRepository
+                .findAll(PageRequest.of(offset, limit))
+                .stream()
+                .filter(note -> !notificationConvertor.convertToDto(note, userId).isRead())
+                .map(notification -> notificationConvertor.convertToDto(notification, userId))
+                .collect(Collectors.toList());
 
         log.info("Method of NotificationServiceDao: " +
                 "getAllUnReadNotifications(" + userId + ") successfully completed");
@@ -152,20 +140,10 @@ public class NotificationServiceDao {
         log.info("Call method of NotificationServiceDao: " +
                 "deleteNotification(" + id + ")");
 
-        notificationRepository.delete(Objects
-                .requireNonNull(notificationRepository
-                        .findById(id).orElse(null)));
+        notificationRepository.deleteById(id);
 
         log.info("Method of NotificationServiceDao: " +
                 "deleteNotification(" + id + ") successfully completed");
-    }
-
-    @Transactional
-    public boolean checkNotificationViewExistenceByUserIdAndNotificationId(
-            UUID userId, UUID notificationId) {
-        return notificationViewRepository
-                .findByUserIdAndNotificationId(userId, notificationId)
-                .orElse(null) != null;
     }
 
     @Transactional
@@ -196,7 +174,9 @@ public class NotificationServiceDao {
         NotificationView notificationView = notificationViewRepository
                 .findByUserIdAndNotificationId(userId, notificationId).orElse(null);
 
-        notificationViewRepository.delete(notificationView);
+        if (notificationView != null) {
+            notificationViewRepository.delete(notificationView);
+        }
 
         log.info("Method of NotificationServiceDao: doUnRead(" + notificationId + ","
                 + userId + ") successfully completed");
