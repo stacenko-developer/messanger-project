@@ -14,11 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -51,7 +47,7 @@ public class NotificationServiceDao {
         log.info("Call method of NotificationServiceDao: getAllReadNotifications("
                 + userId + ")");
 
-        Page<NotificationDto> result = new PageImpl<>(notificationRepository.findAllReadNotifications(userId))
+        Page<NotificationDto> result = new PageImpl<>(notificationRepository.findNotificationsByNotificationViews_UserId(userId))
                 .map(notification -> notificationConvertor.convertToDto(notification, userId));
 
         log.info("Method of NotificationServiceDao: " +
