@@ -24,7 +24,7 @@ public class UserServiceDao {
     public Page<UserDto> getAllUsers(int pageNumber, int size) {
         log.info("Call method of UserServiceDao: getAllUsers()");
 
-        Page<UserDto> result = userRepository.findAll(PageRequest.of(pageNumber, size))
+        Page<UserDto> result = userRepository.findAll(PageRequest.of(pageNumber - 1, size))
                 .map(user -> userConvertor.map(user, UserDto.class));
 
         log.info("Method of UserServiceDao: " +

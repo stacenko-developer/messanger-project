@@ -32,7 +32,7 @@ public class NotificationServiceDao {
                 + userId + ")");
 
         Page<NotificationDto> result = notificationRepository
-                .findAll(PageRequest.of(pageNumber, size))
+                .findAll(PageRequest.of(pageNumber - 1, size))
                 .map(notification -> notificationConvertor.convertToDto(notification, userId));
 
 
@@ -49,7 +49,7 @@ public class NotificationServiceDao {
 
         Page<NotificationDto> result = new PageImpl<>(notificationRepository
                 .findNotificationsByNotificationViews_UserId(userId,
-                        PageRequest.of(pageNumber, size)))
+                        PageRequest.of(pageNumber - 1, size)))
                 .map(notification
                         -> notificationConvertor.convertToDto(notification, userId));
 
@@ -66,7 +66,7 @@ public class NotificationServiceDao {
 
         Page<NotificationDto> result = new PageImpl<>(notificationRepository
                 .findAllUnReadNotifications(userId,
-                        PageRequest.of(pageNumber, size)))
+                        PageRequest.of(pageNumber - 1, size)))
                 .map(notification
                         -> notificationConvertor.convertToDto(notification, userId));
 

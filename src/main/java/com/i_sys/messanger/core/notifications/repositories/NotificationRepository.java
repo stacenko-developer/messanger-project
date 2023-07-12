@@ -13,8 +13,11 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     List<Notification> findNotificationsByNotificationViews_UserId(UUID userId, Pageable pageable);
 
     @Query(nativeQuery = true,
-            value = "SELECT n.id, n.sender, n.text FROM notification.tr_notification n JOIN notification.tr_notification_view nv " +
-                    "ON n.id = nv.notification_id EXCEPT SELECT n.id, n.sender, n.text FROM notification.tr_notification n " +
-                    "JOIN notification.tr_notification_view nv ON n.id = nv.notification_id WHERE nv.user_id = :userId")
+            value = "SELECT DISTINCT n.id, n.sender, n.text FROM notification.tr_notification n " +
+                    "JOIN notification.tr_notification_view nv ON n.id = nv.notification_id " +
+                    "WHERE n.id NOT IN " +
+                    "(SELECT n.id FROM notification.tr_notification n " +
+                    "JOIN notification.tr_notification_view nv ON n.id = nv.notification_id " +
+                    "WHERE nv.user_id = :userId)")
     List<Notification> findAllUnReadNotifications(UUID userId, Pageable pageable);
 }
