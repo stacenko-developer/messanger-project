@@ -1,4 +1,4 @@
-package com.i_sys.messanger.data.messages;
+package com.i_sys.messanger.data.notifications;
 
 import com.i_sys.messanger.data.BaseEntity;
 import jakarta.persistence.*;

@@ -1,4 +1,4 @@
-package com.i_sys.messanger.data.messages;
+package com.i_sys.messanger.data.notifications;
 
 import com.i_sys.messanger.data.BaseEntity;
 import com.i_sys.messanger.data.users.User;
@@ -22,8 +22,4 @@ public class NotificationView extends BaseEntity {
     @JoinColumn(name = "notification_id", nullable = false)
     @Comment("Идентификатор уведомления")
     private Notification notification;
-
-    @Column(name = "is_read", nullable = false)
-    @Comment("Прочитано ли уведомление")
-    private boolean isRead;
 }
