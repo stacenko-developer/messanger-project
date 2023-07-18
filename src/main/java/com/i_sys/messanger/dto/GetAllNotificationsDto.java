@@ -1,5 +1,12 @@
 package com.i_sys.messanger.dto;
 
-public class GetAllNotificationsDto {
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
+public class GetAllNotificationsDto {
+    private Boolean isRead;
+    private Integer pageNumber;
+    private Integer size;
 }

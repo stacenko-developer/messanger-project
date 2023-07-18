@@ -1,6 +1,7 @@
 package com.i_sys.messanger.bean;
 
 import com.i_sys.messanger.dao.notification.service.NotificationServiceDao;
+import com.i_sys.messanger.dto.GetAllNotificationsDto;
 import com.i_sys.messanger.dto.NotificationDto;
 import com.i_sys.messanger.exception.NotFoundException;
 import com.i_sys.messanger.exception.ValidationException;
@@ -29,32 +30,40 @@ public class NotificationServiceBean {
         }
     }
 
-    public Page<NotificationDto> getAllNotifications(UUID userId, boolean isReadable,
-                                                     boolean isUnReadable, int pageNumber,
-                                                     int size) throws Exception {
+    public Page<NotificationDto> getAllNotifications(UUID userId, GetAllNotificationsDto getAllNotificationsDto) throws Exception {
         log.info("Call method of NotificationServiceBean: " +
-                "getAllNotifications(" + userId + "," + pageNumber + ","
-                + size + ")");
+                "getAllNotifications(" + getAllNotificationsDto + ")");
+
+        Page<NotificationDto> result;
+
+        int pageNumber = 1;
+        int size = 10;
+
+        if (getAllNotificationsDto == null) {
+            result = notificationServiceDao.getAllNotifications(userId, pageNumber, size);
+        }
+
+        if (getAllNotificationsDto.getPageNumber() != null) {
+            pageNumber = getAllNotificationsDto.getPageNumber();
+        }
+
+        if (getAllNotificationsDto.getSize() != null) {
+            size = getAllNotificationsDto.getSize();
+        }
 
         if (pageNumber < 1) {
-            throw new ValidationException("pageNumber must be more or equal 1");
+            throw new ValidationException("pageNumber must be more than 1");
         }
 
         if (size < 1) {
-            throw new ValidationException("size must be more or equal 1");
+            throw new ValidationException("size must be more than 1");
         }
 
-        Page<NotificationDto> result = new PageImpl<>(new ArrayList<>());
-
-        if (isReadable && isUnReadable) {
-            result = notificationServiceDao.getAllNotifications(userId, pageNumber, size);
-        }
-        else if (isReadable) {
-            result = notificationServiceDao.getAllReadNotifications(userId, pageNumber, size);
-        }
-        else if (isUnReadable) {
-            result = notificationServiceDao.getAllUnReadNotifications(userId, pageNumber, size);
-        }
+        result = getAllNotificationsDto.getIsRead() == null
+                ? notificationServiceDao.getAllNotifications(userId, pageNumber, size)
+                : getAllNotificationsDto.getIsRead()
+                    ? notificationServiceDao.getAllReadNotifications(userId, pageNumber, size)
+                    : notificationServiceDao.getAllUnReadNotifications(userId, pageNumber, size);
 
         log.info("Method of NotificationServiceBean: " +
                 "getAllNotifications(" + userId + "," + pageNumber + ","

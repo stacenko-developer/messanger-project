@@ -1,6 +1,7 @@
 package com.i_sys.messanger.controller;
 
 import com.i_sys.messanger.bean.NotificationServiceBean;
+import com.i_sys.messanger.dto.GetAllNotificationsDto;
 import com.i_sys.messanger.dto.NotificationDto;
 import com.i_sys.messanger.dto.ResponseDto;
 import com.i_sys.messanger.exception.ValidationException;
@@ -19,23 +20,17 @@ public class NotificationController {
     private final NotificationServiceBean notificationServiceBean;
 
     @GetMapping
-    public ResponseDto getAllNotifications(@RequestParam UUID userId,
-                                           boolean isReadable, boolean isUnreadable,
-                                           int pageNumber, int size) throws Exception {
+    public ResponseDto getAllNotifications(@RequestParam UUID userId, GetAllNotificationsDto getAllNotificationsDto) throws Exception {
         log.info("Call method of NotificationController: " +
-                "getAllNotifications(" + userId + "," + isReadable + ","
-                + "," + isUnreadable + "," + "," + pageNumber + ","
-                + size + ")");
+                "getAllNotifications(" + getAllNotificationsDto + ")");
 
         ResponseDto responseDto = new ResponseDto();
 
         responseDto.setStatus(HttpStatus.OK.value());
-        responseDto.setContent(notificationServiceBean.getAllNotifications(userId, isReadable,
-                    isUnreadable, pageNumber, size));
+        responseDto.setContent(notificationServiceBean.getAllNotifications(userId, getAllNotificationsDto));
 
         log.info("Method of NotificationController: " +
-                "getAllNotifications(" + userId + "," + pageNumber + ","
-                + size + ") successfully completed");
+                "getAllNotifications(" + getAllNotificationsDto + ") successfully completed");
 
         return responseDto;
     }
