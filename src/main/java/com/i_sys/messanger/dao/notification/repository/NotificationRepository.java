@@ -14,7 +14,6 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 
     @Query(nativeQuery = true,
             value = "SELECT DISTINCT n_first.id, n_first.sender, n_first.text FROM notification.tr_notification n_first " +
-                    "JOIN notification.tr_notification_view nv ON n_first.id = nv.notification_id " +
                     "WHERE NOT EXISTS " +
                     "(SELECT n_second.id FROM notification.tr_notification n_second " +
                     "JOIN notification.tr_notification_view nv ON n_second.id = nv.notification_id " +
