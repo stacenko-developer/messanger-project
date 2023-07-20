@@ -89,12 +89,14 @@ public class UserServiceDao {
         log.info("Call method of UserServiceDao: " +
                 "updateUser(" + id + "," + user + ")");
 
-        User userForUpdate = userConvertor.map(user, User.class);
+        User entity = userRepository.findById(id).orElse(null);
 
-        userForUpdate.setId(id);
+        userConvertor.map(user, entity);
+
+        entity.setId(id);
 
         UserDto result = userConvertor
-                .map(userRepository.save(userForUpdate), UserDto.class);
+                .map(userRepository.save(entity), UserDto.class);
 
         log.info("Method of UserServiceDao: " +
                 "updateUser(" + id + "," + user + ") successfully completed");

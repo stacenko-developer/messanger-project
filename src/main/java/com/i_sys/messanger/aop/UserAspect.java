@@ -27,7 +27,7 @@ public class UserAspect {
 
         if (index != -1 && paramValues[index] instanceof UUID
                 && userRepository
-                .findByExternalId((UUID) paramValues[index]).orElse(null) == null) {
+                .findById((UUID) paramValues[index]).orElse(null) == null) {
             User user = new User();
             user.setExternalId((UUID) paramValues[index]);
             userRepository.save(user);

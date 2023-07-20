@@ -119,14 +119,15 @@ public class NotificationServiceDao {
         log.info("Call method of NotificationServiceDao: " +
                 "updateNotification(" + id + "," + notification + ")");
 
-        Notification notificationForUpdate = notificationConvertor
-                .convertToModel(notification);
+        Notification entity = notificationRepository.findById(id).orElse(null);
 
-        notificationForUpdate.setId(id);
+        notificationConvertor.map(notification, entity);
+
+        entity.setId(id);
 
         NotificationDto result = notificationConvertor
                 .convertToDto(notificationRepository
-                        .save(notificationForUpdate));
+                        .save(entity));
 
         log.info("Method of NotificationServiceDao: " +
                 "updateNotification(" + id + "," + notification + ") " +

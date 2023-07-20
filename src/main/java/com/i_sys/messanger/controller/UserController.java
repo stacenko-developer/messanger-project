@@ -26,6 +26,17 @@ public class UserController {
 
         ResponseDto responseDto = new ResponseDto();
 
+        int defaultPageNumber = 1;
+        int defaultSize = 5;
+
+        if (pageNumber <= 0) {
+            pageNumber = defaultPageNumber;
+        }
+
+        if (size <= 0) {
+            size = defaultSize;
+        }
+
         responseDto.setStatus(HttpStatus.OK.value());
         responseDto.setContent(userServiceDao.getAllUsers(pageNumber, size));
 
@@ -74,10 +85,14 @@ public class UserController {
     }
 
     @PutMapping({"id"})
-    public ResponseDto updateUser(@RequestParam UUID id, @RequestBody UserDto user) {
+    public ResponseDto updateUser(@RequestParam UUID id, @RequestBody UserDto user) throws Exception {
         log.info("Call method of UserController: " +
                 "updateUser(" + id + "," + user + ")");
         ResponseDto responseDto = new ResponseDto();
+
+        if (userServiceDao.getUserById(id) == null) {
+            throw new NotFoundException("User with this id not found in system");
+        }
 
         responseDto.setStatus(HttpStatus.OK.value());
         responseDto.setContent(userServiceDao.updateUser(id, user));

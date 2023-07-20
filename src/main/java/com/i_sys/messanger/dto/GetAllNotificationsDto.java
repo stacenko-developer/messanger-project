@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class GetAllNotificationsDto {
     private Boolean isRead;
-    private Integer pageNumber;
-    private Integer size;
+    private int pageNumber;
+    private int size;
 }

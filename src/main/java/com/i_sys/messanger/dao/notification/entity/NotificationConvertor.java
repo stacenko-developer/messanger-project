@@ -34,4 +34,8 @@ public class NotificationConvertor {
     public Notification convertToModel(NotificationDto notificationDto) {
         return modelMapper.map(notificationDto, Notification.class);
     }
+
+    public void map(NotificationDto notificationDto, Notification notification) {
+        modelMapper.map(notificationDto, notification);
+    }
 }

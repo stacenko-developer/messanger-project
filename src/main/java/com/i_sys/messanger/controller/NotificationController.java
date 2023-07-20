@@ -22,7 +22,7 @@ public class NotificationController {
     @GetMapping
     public ResponseDto getAllNotifications(@RequestParam UUID userId, GetAllNotificationsDto getAllNotificationsDto) throws Exception {
         log.info("Call method of NotificationController: " +
-                "getAllNotifications(" + getAllNotificationsDto + ")");
+                "getAllNotifications(" + userId + "," + getAllNotificationsDto + ")");
 
         ResponseDto responseDto = new ResponseDto();
 
@@ -30,7 +30,7 @@ public class NotificationController {
         responseDto.setContent(notificationServiceBean.getAllNotifications(userId, getAllNotificationsDto));
 
         log.info("Method of NotificationController: " +
-                "getAllNotifications(" + getAllNotificationsDto + ") successfully completed");
+                "getAllNotifications(" + userId + "," + getAllNotificationsDto + ") successfully completed");
 
         return responseDto;
     }
@@ -74,11 +74,11 @@ public class NotificationController {
     }
 
     @PutMapping({"id"})
-    public ResponseDto updateNotification(@RequestParam UUID id, @RequestParam UUID userId,
-                                             @RequestBody NotificationDto notification
+    public ResponseDto updateNotification(@RequestParam UUID notificationId, @RequestParam UUID userId,
+                                          @RequestBody NotificationDto notification
                                              ) throws Exception {
         log.info("Call method of NotificationController: " +
-                "updateNotification(" + id + "," + notification + ")");
+                "updateNotification(" + notificationId + "," + userId + "," + notification + ")");
 
         if (notification == null) {
             throw new ValidationException("Notification is null!");
@@ -87,18 +87,18 @@ public class NotificationController {
         ResponseDto responseDto = new ResponseDto();
 
         responseDto.setContent(notificationServiceBean
-                .updateNotification(id, userId, notification));
+                .updateNotification(notificationId, userId, notification));
         responseDto.setStatus(HttpStatus.OK.value());
 
         log.info("Method of NotificationController: " +
-                "updateNotification(" + id + "," + notification + ") " +
-                "successfully completed");
+                "updateNotification(" + notificationId + "," + userId + ","
+                + notification + ") " + "successfully completed");
 
         return responseDto;
     }
 
     @DeleteMapping({"id"})
-    public ResponseDto deleteNotification(@RequestParam UUID id) throws Exception {
+    public ResponseDto deleteNotification(@RequestParam UUID id) {
         log.info("Call method of NotificationController: " +
                 "deleteNotification(" + id + ")");
 
