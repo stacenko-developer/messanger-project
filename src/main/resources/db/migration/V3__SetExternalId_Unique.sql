@@ -1,0 +1,1 @@
+alter table notification.tr_user add unique (external_id);
